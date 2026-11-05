@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenVault - Partage & Téléchargement Libre</title>
+    <title>EduVault - Partage de Cours & PDF Lycée</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -33,8 +33,8 @@
             }
         }
     </script>
-    <!-- Google Fonts Inter & FontAwesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
@@ -70,7 +70,7 @@
         }
         .drop-zone--over {
             border-color: #8b5cf6 !important;
-            background-color: rgba(139, 92, 246, 0.1) !important;
+            background-color: rgba(139, 92, 246, 0.15) !important;
         }
     </style>
 </head>
@@ -79,57 +79,66 @@
     <!-- HEADER / NAVIGATION -->
     <header class="sticky top-0 z-40 glass border-b border-dark-700/60">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 gap-4">
+            <div class="flex items-center justify-between h-16 gap-3">
                 
-                <!-- Logo & Brand -->
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="resetSearch()">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="resetFilters()">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                        <i class="fa-solid fa-cloud-arrow-up text-white text-xl"></i>
+                        <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
                     </div>
-                    <span class="text-xl font-bold tracking-tight text-white">Open<span class="text-violet-500">Vault</span></span>
+                    <span class="text-xl font-extrabold tracking-tight text-white hidden sm:inline">Edu<span class="text-violet-500">Vault</span></span>
                 </div>
 
                 <!-- Search Bar -->
-                <div class="flex-1 max-w-md mx-4 relative">
+                <div class="flex-1 max-w-md relative">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Rechercher un fichier..." 
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Rechercher un fichier ou un cours..." 
                         class="w-full pl-10 pr-4 py-2 rounded-xl bg-dark-700/70 border border-dark-600/80 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition">
                 </div>
 
-                <!-- Fast Upload Button -->
-                <div>
-                    <label for="directFileInput" class="cursor-pointer px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-violet-600/30">
-                        <i class="fa-solid fa-plus"></i>
-                        <span class="hidden sm:inline">Déposer un fichier</span>
-                    </label>
-                    <input type="file" id="directFileInput" class="hidden" onchange="handleDirectFileSelect(event)" multiple>
+                <!-- Action Buttons -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="openAddCategoryModal()" class="px-3 py-2 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-200 border border-dark-600 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-folder-plus text-violet-400"></i>
+                        <span class="hidden md:inline">Nouvelle Matière</span>
+                    </button>
+                    <button onclick="openUploadModal()" class="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs sm:text-sm font-semibold flex items-center gap-2 transition shadow-lg shadow-violet-600/30">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span class="hidden sm:inline">Publier un document</span>
+                    </button>
                 </div>
 
             </div>
         </div>
     </header>
 
-    <!-- HERO & UPLOAD ZONE -->
+    <!-- HERO & CATEGORIES BAR -->
     <main class="flex-grow">
-        <section class="relative overflow-hidden py-8 bg-gradient-to-b from-dark-800 to-dark-900 border-b border-dark-700/40">
-            <div class="max-w-4xl mx-auto px-4 text-center">
-                <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
-                    Partagez & Téléchargez <span class="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">vos Fichiers Librement</span>
-                </h1>
-                <p class="text-gray-400 text-xs sm:text-sm mb-6">
-                    Déposez vos PDF, documents, images ou archives. Tout est accessible directement à tout le monde.
-                </p>
-
-                <!-- Drag & Drop Zone -->
-                <div id="dropZone" onclick="document.getElementById('directFileInput').click()" 
-                    class="border-2 border-dashed border-dark-600 hover:border-violet-500/60 bg-dark-800/50 hover:bg-dark-800/80 rounded-2xl p-8 cursor-pointer transition flex flex-col items-center justify-center gap-3">
-                    <div class="w-14 h-14 rounded-2xl bg-violet-600/20 text-violet-400 flex items-center justify-center text-2xl border border-violet-500/30">
-                        <i class="fa-solid fa-file-arrow-up"></i>
-                    </div>
+        <section class="py-6 bg-gradient-to-b from-dark-800 to-dark-900 border-b border-dark-700/40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
                     <div>
-                        <p class="text-sm font-semibold text-white">Glissez-déposez vos fichiers ici</p>
-                        <p class="text-xs text-gray-400 mt-1">ou cliquez pour parcourir vos dossiers (PDF, ZIP, PNG, DOCX...)</p>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Espace de Partage <span class="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Lycée & Révisions</span>
+                        </h1>
+                        <p class="text-gray-400 text-xs sm:text-sm mt-1">
+                            Accédez aux cours, fiches et PDF déposés en commun par tous les élèves.
+                        </p>
                     </div>
+
+                    <div class="flex items-center gap-2 bg-violet-950/40 border border-violet-500/20 px-3 py-1.5 rounded-xl text-xs text-violet-300">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+                        </span>
+                        <span>Cloud Firebase actif (En direct)</span>
+                    </div>
+                </div>
+
+                <!-- Categories Horizontal Scroll -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="categoriesContainer">
+                    <!-- Populated dynamically -->
                 </div>
             </div>
         </section>
@@ -138,8 +147,8 @@
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-folder-open text-violet-500"></i>
-                    Fichiers disponibles
+                    <i class="fa-solid fa-book-bookmark text-violet-500"></i>
+                    <span id="currentCategoryLabel">Tous les documents</span>
                 </h2>
                 <span id="fileCountLabel" class="text-xs text-gray-400">0 fichier(s)</span>
             </div>
@@ -152,10 +161,13 @@
             <!-- Empty State -->
             <div id="emptyState" class="hidden text-center py-16 bg-dark-800/40 rounded-2xl border border-dark-700/60 my-4">
                 <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-dark-700 flex items-center justify-center text-gray-500 text-xl">
-                    <i class="fa-solid fa-box-open"></i>
+                    <i class="fa-solid fa-folder-open"></i>
                 </div>
-                <h3 class="text-base font-semibold text-white mb-1">Aucun fichier déposé</h3>
-                <p class="text-xs text-gray-400 max-w-sm mx-auto mb-4">Utilisez la zone ci-dessus pour déposer le premier fichier !</p>
+                <h3 class="text-base font-semibold text-white mb-1">Aucun document dans cette rubrique</h3>
+                <p class="text-xs text-gray-400 max-w-sm mx-auto mb-4">Soyez le premier à ajouter un fichier de cours ou un PDF !</p>
+                <button onclick="openUploadModal()" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold rounded-xl transition">
+                    Déposer un document
+                </button>
             </div>
         </section>
     </main>
@@ -163,20 +175,92 @@
     <!-- FOOTER -->
     <footer class="bg-dark-800 border-t border-dark-700/60 py-6 text-xs text-gray-400">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>© OpenVault - Plateforme de partage simple et sans contrainte.</p>
+            <p>© EduVault - Partage communautaire de fichiers de cours et révisions pour le lycée.</p>
         </div>
     </footer>
 
-    <!-- MODAL: PREVIEW PDF / IMAGE -->
+    <!-- MODAL: UPLOAD FILE -->
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-lg rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-cloud-arrow-up text-violet-400"></i> Déposer un document
+            </h3>
+
+            <form id="uploadForm" onsubmit="handleUploadSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Titre du document *</label>
+                    <input type="text" id="docTitle" required placeholder="ex: Chapitre 3 - Intégrales (Fiche)" 
+                        class="w-full px-3 py-2 rounded-xl bg-dark-700 border border-dark-600 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Matière / Catégorie *</label>
+                    <select id="docCategory" required class="w-full px-3 py-2 rounded-xl bg-dark-700 border border-dark-600 text-sm text-gray-100 focus:outline-none focus:border-violet-500">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Description (optionnelle)</label>
+                    <textarea id="docDescription" rows="2" placeholder="Informations complémentaires, chapitre, classe..." 
+                        class="w-full px-3 py-2 rounded-xl bg-dark-700 border border-dark-600 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Fichier (PDF, Doc, Image...) *</label>
+                    <input type="file" id="docFile" required class="w-full text-xs text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-700 file:cursor-pointer">
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeUploadModal()" class="px-4 py-2 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-300 text-xs font-semibold">Annuler</button>
+                    <button type="submit" id="submitUploadBtn" class="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-lg shadow-violet-600/30 flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i> Publier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD CATEGORY -->
+    <div id="categoryModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeCategoryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-folder-plus text-violet-400"></i> Ajouter une nouvelle matière
+            </h3>
+
+            <form onsubmit="handleCategorySubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Nom de la matière *</label>
+                    <input type="text" id="newCategoryName" required placeholder="ex: Grand Oral, HGGSP..." 
+                        class="w-full px-3 py-2 rounded-xl bg-dark-700 border border-dark-600 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500">
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeCategoryModal()" class="px-4 py-2 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-300 text-xs font-semibold">Annuler</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold shadow-lg shadow-violet-600/30">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PREVIEW PDF -->
     <div id="previewModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 bg-black/80 backdrop-blur-sm">
         <div class="glass-modal w-full max-w-5xl h-[90vh] rounded-2xl flex flex-col overflow-hidden shadow-2xl">
             <div class="flex items-center justify-between px-5 py-3 border-b border-dark-700 bg-dark-800">
                 <div class="flex items-center space-x-3 truncate">
-                    <i id="previewIcon" class="fa-solid fa-file text-violet-400"></i>
-                    <h3 id="previewTitle" class="text-sm font-semibold text-white truncate">Aperçu</h3>
+                    <i id="previewIcon" class="fa-solid fa-file-pdf text-red-400"></i>
+                    <h3 id="previewTitle" class="text-sm font-semibold text-white truncate">Aperçu du document</h3>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <a id="previewDownloadBtn" href="#" download class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+                    <a id="previewDownloadBtn" href="#" target="_blank" download class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
                         <i class="fa-solid fa-download"></i> Télécharger
                     </a>
                     <button onclick="closePreviewModal()" class="w-8 h-8 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center">
@@ -185,7 +269,7 @@
                 </div>
             </div>
             <div id="previewContainer" class="flex-1 bg-dark-900 flex items-center justify-center p-2 overflow-hidden">
-                <!-- Viewer iframe / img content -->
+                <!-- Viewer iframe -->
             </div>
         </div>
     </div>
@@ -198,82 +282,321 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC WITH INDEXEDDB PERSISTENCE -->
-    <script>
-        // IndexedDB Configuration
-        const DB_NAME = 'OpenVaultDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'files';
-        let db;
+    <!-- FIREBASE MODULE INTEGRATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let filesList = [];
+        // Global Firebase configuration setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'eduvault-lycee-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "AIzaSyDemoConfigKeyForDeploymentOnly12345",
+                authDomain: "eduvault-demo.firebaseapp.com",
+                projectId: "eduvault-demo",
+                storageBucket: "eduvault-demo.appspot.com",
+                messagingSenderId: "1234567890",
+                appId: "1:1234567890:web:abcdef123456"
+            };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State
+        let currentUser = null;
+        let categories = ["Tous", "Mathématiques", "Physique-Chimie", "SVT", "Histoire-Géo", "Français", "Philosophie", "Langues", "NSI", "EPS", "Autre"];
+        let selectedCategory = "Tous";
         let searchQuery = "";
+        let filesList = [];
 
-        // Open IndexedDB
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                    }
-                };
-                request.onsuccess = (e) => {
-                    db = e.target.result;
-                    resolve(db);
-                };
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        // Save File to IndexedDB
-        function saveFileToDB(fileRecord) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.put(fileRecord);
-                request.onsuccess = () => resolve();
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        // Get All Files from IndexedDB
-        function getAllFilesFromDB() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        // Delete File from IndexedDB
-        function deleteFileFromDB(id) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.delete(id);
-                request.onsuccess = () => resolve();
-                request.onerror = (e) => reject(e.target.error);
-            });
-        }
-
-        // App Initialization
+        // Auth initialization
         window.addEventListener('DOMContentLoaded', async () => {
             try {
-                await initDB();
-                filesList = await getAllFilesFromDB();
-                filesList.sort((a, b) => new Date(b.date) - new Date(a.date));
-                renderFiles();
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
             } catch (err) {
-                console.error("IndexedDB error:", err);
+                console.warn("Auth fallback to anonymous", err);
             }
-            setupDragAndDrop();
         });
 
-        // Toast System
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                initFirestoreListeners();
+            }
+        });
+
+        // Realtime Firestore listeners
+        function initFirestoreListeners() {
+            // Listen to public documents
+            const docsRef = collection(db, 'artifacts', appId, 'public', 'data', 'documents');
+            onSnapshot(docsRef, (snapshot) => {
+                filesList = [];
+                snapshot.forEach((docSnap) => {
+                    filesList.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                filesList.sort((a, b) => new Date(b.date) - new Date(a.date));
+                renderFiles();
+            }, (error) => {
+                console.error("Firestore docs listener error:", error);
+            });
+
+            // Listen to dynamic categories
+            const catRef = collection(db, 'artifacts', appId, 'public', 'data', 'categories');
+            onSnapshot(catRef, (snapshot) => {
+                const customCats = [];
+                snapshot.forEach((cSnap) => {
+                    const data = cSnap.data();
+                    if (data.name && !categories.includes(data.name)) {
+                        customCats.push(data.name);
+                    }
+                });
+                categories = ["Tous", "Mathématiques", "Physique-Chimie", "SVT", "Histoire-Géo", "Français", "Philosophie", "Langues", "NSI", "EPS", ...customCats, "Autre"];
+                renderCategories();
+            }, (error) => {
+                console.error("Firestore categories listener error:", error);
+            });
+        }
+
+        // Render Categories Bar
+        window.renderCategories = function() {
+            const container = document.getElementById('categoriesContainer');
+            const selectDoc = document.getElementById('docCategory');
+            
+            container.innerHTML = categories.map(cat => `
+                <button onclick="selectCategory('${cat}')" 
+                    class="px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition border ${selectedCategory === cat ? 'bg-violet-600 text-white border-violet-500 shadow-md shadow-violet-600/30' : 'bg-dark-700/80 hover:bg-dark-600 text-gray-300 border-dark-600'}">
+                    ${cat}
+                </button>
+            `).join('');
+
+            selectDoc.innerHTML = categories.filter(c => c !== "Tous").map(cat => `
+                <option value="${cat}">${cat}</option>
+            `).join('');
+        };
+
+        window.selectCategory = function(cat) {
+            selectedCategory = cat;
+            document.getElementById('currentCategoryLabel').innerText = cat === "Tous" ? "Tous les documents" : `Matière : ${cat}`;
+            renderCategories();
+            renderFiles();
+        };
+
+        window.resetFilters = function() {
+            selectedCategory = "Tous";
+            searchQuery = "";
+            document.getElementById('searchInput').value = "";
+            document.getElementById('currentCategoryLabel').innerText = "Tous les documents";
+            renderCategories();
+            renderFiles();
+        };
+
+        window.handleSearch = function() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            renderFiles();
+        };
+
+        // Render Files Cards
+        window.renderFiles = function() {
+            const grid = document.getElementById('filesGrid');
+            const emptyState = document.getElementById('emptyState');
+            const countLabel = document.getElementById('fileCountLabel');
+
+            let filtered = filesList.filter(file => {
+                const matchesCat = selectedCategory === "Tous" || file.category === selectedCategory;
+                const matchesSearch = file.title.toLowerCase().includes(searchQuery) || 
+                                     (file.description && file.description.toLowerCase().includes(searchQuery)) ||
+                                     file.category.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSearch;
+            });
+
+            countLabel.innerText = `${filtered.length} document(s)`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(file => {
+                const dateFormatted = new Date(file.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                const isOwner = currentUser && file.userId === currentUser.uid;
+
+                return `
+                    <div class="glass rounded-2xl p-4 flex flex-col justify-between hover:border-violet-500/40 transition duration-200">
+                        <div>
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <span class="px-2.5 py-1 rounded-lg bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[11px] font-semibold">
+                                    ${file.category}
+                                </span>
+                                ${isOwner ? `
+                                    <button onclick="deleteDocFile('${file.id}')" title="Supprimer" class="text-gray-500 hover:text-red-400 p-1 transition">
+                                        <i class="fa-solid fa-trash-can text-sm"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+
+                            <h3 class="text-base font-bold text-white truncate mb-1" title="${file.title}">
+                                ${file.title}
+                            </h3>
+
+                            ${file.description ? `<p class="text-xs text-gray-400 line-clamp-2 mb-3">${file.description}</p>` : ''}
+
+                            <div class="flex items-center gap-2 text-[11px] text-gray-400 mb-4">
+                                <span><i class="fa-regular fa-file-lines text-violet-400 mr-1"></i>${file.size || 'PDF'}</span>
+                                <span>•</span>
+                                <span>${dateFormatted}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-3 border-t border-dark-700/60">
+                            <button onclick="openPreview('${file.fileUrl}', '${file.title.replace(/'/g, "\\'")}')" class="flex-1 py-1.5 px-3 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-dark-600 transition">
+                                <i class="fa-solid fa-eye text-violet-400"></i> Aperçu
+                            </button>
+                            <a href="${file.fileUrl}" target="_blank" download="${file.title}" class="flex-1 py-1.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-md shadow-violet-600/20">
+                                <i class="fa-solid fa-download"></i> Télécharger
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        // File Upload Form Handling
+        window.handleUploadSubmit = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const btn = document.getElementById('submitUploadBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Publication...`;
+
+            const title = document.getElementById('docTitle').value.trim();
+            const category = document.getElementById('docCategory').value;
+            const description = document.getElementById('docDescription').value.trim();
+            const fileInput = document.getElementById('docFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showToast("Veuillez sélectionner un fichier.", "fa-triangle-exclamation");
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Publier`;
+                return;
+            }
+
+            try {
+                // Read File as Data URL (Base64) for lightweight persistent storage
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    const dataUrl = event.target.result;
+                    
+                    const docData = {
+                        title: title,
+                        category: category,
+                        description: description,
+                        fileUrl: dataUrl,
+                        size: formatSize(file.size),
+                        date: new Date().toISOString(),
+                        userId: currentUser.uid
+                    };
+
+                    const docsRef = collection(db, 'artifacts', appId, 'public', 'data', 'documents');
+                    await addDoc(docsRef, docData);
+
+                    showToast("Document publié et partagé avec tous !");
+                    closeUploadModal();
+                    document.getElementById('uploadForm').reset();
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i> Publier`;
+                };
+                reader.readAsDataURL(file);
+
+            } catch (err) {
+                console.error("Upload error:", err);
+                showToast("Erreur lors de la publication.", "fa-xmark");
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Publier`;
+            }
+        };
+
+        // Add Category Handling
+        window.handleCategorySubmit = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const name = document.getElementById('newCategoryName').value.trim();
+            if (!name) return;
+
+            try {
+                const catRef = collection(db, 'artifacts', appId, 'public', 'data', 'categories');
+                await addDoc(catRef, { name: name, createdAt: new Date().toISOString() });
+                showToast(`Nouvelle matière "${name}" ajoutée !`);
+                closeCategoryModal();
+                document.getElementById('newCategoryName').value = "";
+            } catch (err) {
+                console.error("Category error:", err);
+            }
+        };
+
+        // Delete Document
+        window.deleteDocFile = async function(docId) {
+            if (!currentUser) return;
+            if (confirm("Voulez-vous supprimer ce document de la plateforme ?")) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'documents', docId);
+                    await deleteDoc(docRef);
+                    showToast("Document supprimé", "fa-trash-can");
+                } catch (err) {
+                    console.error("Delete error:", err);
+                }
+            }
+        };
+
+        // Preview Handling
+        window.openPreview = function(url, title) {
+            document.getElementById('previewTitle').innerText = title;
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = `<iframe src="${url}" class="w-full h-full border-0 rounded-xl"></iframe>`;
+            document.getElementById('previewDownloadBtn').href = url;
+            document.getElementById('previewModal').classList.remove('hidden');
+        };
+
+        window.closePreviewModal = function() {
+            document.getElementById('previewModal').classList.add('hidden');
+            document.getElementById('previewContainer').innerHTML = "";
+        };
+
+        // Helper Modal & Toasts
+        window.openUploadModal = function() {
+            renderCategories();
+            document.getElementById('uploadModal').classList.remove('hidden');
+        };
+        window.closeUploadModal = function() {
+            document.getElementById('uploadModal').classList.add('hidden');
+        };
+        window.openAddCategoryModal = function() {
+            document.getElementById('categoryModal').classList.remove('hidden');
+        };
+        window.closeCategoryModal = function() {
+            document.getElementById('categoryModal').classList.add('hidden');
+        };
+
+        function formatSize(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['octets', 'Ko', 'Mo', 'Go'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
         function showToast(message, icon = "fa-circle-check") {
             const toast = document.getElementById('toast');
             document.getElementById('toastMessage').innerText = message;
@@ -286,214 +609,7 @@
             }, 3000);
         }
 
-        // Drag & Drop Handling
-        function setupDragAndDrop() {
-            const dropZone = document.getElementById('dropZone');
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropZone.classList.add('drop-zone--over');
-                }, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropZone.classList.remove('drop-zone--over');
-                }, false);
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFilesUpload(files);
-            });
-        }
-
-        function handleDirectFileSelect(e) {
-            handleFilesUpload(e.target.files);
-        }
-
-        async function handleFilesUpload(files) {
-            if (!files || files.length === 0) return;
-
-            for (let file of files) {
-                const fileRecord = {
-                    id: 'file-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-                    name: file.name,
-                    size: formatSize(file.size),
-                    type: file.type || getExtension(file.name),
-                    date: new Date().toISOString(),
-                    data: file // Blob stored in IndexedDB
-                };
-
-                await saveFileToDB(fileRecord);
-                filesList.unshift(fileRecord);
-            }
-
-            renderFiles();
-            showToast(`${files.length} fichier(s) ajouté(s) avec succès !`);
-            document.getElementById('directFileInput').value = "";
-        }
-
-        // Helpers
-        function formatSize(bytes) {
-            if (bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['octets', 'Ko', 'Mo', 'Go'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function getExtension(filename) {
-            const parts = filename.split('.');
-            return parts.length > 1 ? parts.pop().toUpperCase() : 'FICHIER';
-        }
-
-        function getFileIcon(type, name) {
-            const ext = getExtension(name).toLowerCase();
-            if (type.includes('pdf') || ext === 'pdf') return { icon: 'fa-file-pdf', color: 'text-red-400' };
-            if (type.includes('image') || ['png','jpg','jpeg','gif','svg','webp'].includes(ext)) return { icon: 'fa-file-image', color: 'text-emerald-400' };
-            if (['zip','rar','7z','tar','gz'].includes(ext)) return { icon: 'fa-file-archive', color: 'text-amber-400' };
-            if (['doc','docx','txt','rtf'].includes(ext)) return { icon: 'fa-file-word', color: 'text-blue-400' };
-            return { icon: 'fa-file', color: 'text-violet-400' };
-        }
-
-        // Search & Render
-        function handleSearch() {
-            searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-            renderFiles();
-        }
-
-        function resetSearch() {
-            searchQuery = "";
-            document.getElementById('searchInput').value = "";
-            renderFiles();
-        }
-
-        function renderFiles() {
-            const grid = document.getElementById('filesGrid');
-            const emptyState = document.getElementById('emptyState');
-            const countLabel = document.getElementById('fileCountLabel');
-
-            let filtered = filesList.filter(f => f.name.toLowerCase().includes(searchQuery));
-
-            countLabel.innerText = `${filtered.length} fichier(s)`;
-
-            if (filtered.length === 0) {
-                grid.innerHTML = "";
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-
-            grid.innerHTML = filtered.map(file => {
-                const { icon, color } = getFileIcon(file.type, file.name);
-                const dateFormatted = new Date(file.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
-                const canPreview = file.type.includes('pdf') || file.type.includes('image') || getExtension(file.name).toLowerCase() === 'pdf';
-
-                return `
-                    <div class="glass rounded-2xl p-4 flex flex-col justify-between hover:border-violet-500/40 transition duration-200">
-                        <div>
-                            <div class="flex items-start justify-between gap-3 mb-3">
-                                <div class="w-10 h-10 rounded-xl bg-dark-700/80 flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-solid ${icon} ${color} text-lg"></i>
-                                </div>
-                                <button onclick="deleteFile('${file.id}')" title="Supprimer" class="text-gray-500 hover:text-red-400 p-1 transition">
-                                    <i class="fa-solid fa-trash-can text-sm"></i>
-                                </button>
-                            </div>
-
-                            <h3 class="text-sm font-bold text-white truncate mb-1" title="${file.name}">
-                                ${file.name}
-                            </h3>
-
-                            <div class="flex items-center gap-2 text-[11px] text-gray-400 mb-4">
-                                <span>${file.size}</span>
-                                <span>•</span>
-                                <span>${dateFormatted}</span>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-2 pt-3 border-t border-dark-700/60">
-                            ${canPreview ? `
-                                <button onclick="openPreview('${file.id}')" class="flex-1 py-1.5 px-3 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-dark-600 transition">
-                                    <i class="fa-solid fa-eye"></i> Aperçu
-                                </button>
-                            ` : ''}
-                            <button onclick="downloadFile('${file.id}')" class="flex-1 py-1.5 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-md shadow-violet-600/20">
-                                <i class="fa-solid fa-download"></i> Télécharger
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Preview Logic
-        function openPreview(id) {
-            const file = filesList.find(f => f.id === id);
-            if (!file) return;
-
-            document.getElementById('previewTitle').innerText = file.name;
-            const container = document.getElementById('previewContainer');
-            container.innerHTML = "";
-
-            const url = URL.createObjectURL(file.data);
-
-            if (file.type.includes('image')) {
-                const img = document.createElement('img');
-                img.src = url;
-                img.className = "max-h-full max-w-full object-contain rounded-lg";
-                container.appendChild(img);
-            } else {
-                const iframe = document.createElement('iframe');
-                iframe.src = url;
-                iframe.className = "w-full h-full border-0 rounded-lg";
-                container.appendChild(iframe);
-            }
-
-            const downloadBtn = document.getElementById('previewDownloadBtn');
-            downloadBtn.onclick = () => downloadFile(id);
-
-            document.getElementById('previewModal').classList.remove('hidden');
-        }
-
-        function closePreviewModal() {
-            document.getElementById('previewModal').classList.add('hidden');
-            document.getElementById('previewContainer').innerHTML = "";
-        }
-
-        // Download Logic
-        function downloadFile(id) {
-            const file = filesList.find(f => f.id === id);
-            if (!file) return;
-
-            const url = URL.createObjectURL(file.data);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = file.name;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-            showToast(`Téléchargement de ${file.name}`);
-        }
-
-        // Delete Logic
-        async function deleteFile(id) {
-            if (confirm("Voulez-vous supprimer ce fichier ?")) {
-                await deleteFileFromDB(id);
-                filesList = filesList.filter(f => f.id !== id);
-                renderFiles();
-                showToast("Fichier supprimé", "fa-trash-can");
-            }
-        }
+        renderCategories();
     </script>
 </body>
 </html>
