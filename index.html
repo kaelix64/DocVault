@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocVault - Partage & Consultation de PDF</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            900: '#0b0b0e',
+                            800: '#13131a',
+                            700: '#1c1c26',
+                            600: '#282836',
+                            500: '#38384a'
+                        },
+                        violet: {
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0b0e;
+            color: #e4e4e7;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #13131a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #282836;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6;
+        }
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(19, 19, 26, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-modal {
+            background: rgba(20, 20, 28, 0.92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-violet-500 selection:text-white">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="sticky top-0 z-40 glass border-b border-dark-700/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 gap-4">
+                
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="resetFilters()">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                        <i class="fa-solid font-bold fa-file-pdf text-white text-xl"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight text-white">Doc<span class="text-violet-500">Vault</span></span>
+                </div>
+
+                <!-- Desktop Search Bar -->
+                <div class="hidden md:flex flex-1 max-w-md mx-4 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Rechercher un document, tutoriel, mod..." 
+                        class="w-full pl-10 pr-4 py-2 rounded-xl bg-dark-700/70 border border-dark-600/80 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition">
+                </div>
+
+                <!-- Actions / Admin Button -->
+                <div class="flex items-center space-x-3">
+                    <button id="adminBtn" onclick="openAdminAuthOrPanel()" 
+                        class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-dark-700 hover:bg-violet-600/20 text-gray-200 hover:text-violet-400 border border-dark-600 hover:border-violet-500/50 transition text-sm font-medium">
+                        <i class="fa-solid fa-lock text-xs"></i>
+                        <span id="adminBtnText">Administration</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Search Bar -->
+            <div class="md:hidden py-2 pb-3">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="mobileSearchInput" oninput="handleSearchMobile()" placeholder="Rechercher un PDF..." 
+                        class="w-full pl-10 pr-4 py-2 rounded-xl bg-dark-700/70 border border-dark-600 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-500">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO & CATEGORIES BANNER -->
+    <main class="flex-grow">
+        <section class="relative overflow-hidden py-10 bg-gradient-to-b from-dark-800 to-dark-900 border-b border-dark-700/40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
+                    Bibliothèque & Partage de <span class="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Fichiers PDF</span>
+                </h1>
+                <p class="max-w-2xl mx-auto text-gray-400 text-sm sm:text-base mb-8">
+                    Consultez, téléchargez et publiez facilement vos guides, tutoriels, actualités et documentations en haute résolution.
+                </p>
+
+                <!-- Category Pills Horizontal Slider -->
+                <div class="flex items-center justify-start md:justify-center space-x-2 overflow-x-auto pb-2 scrollbar-none px-2" id="categoriesContainer">
+                    <!-- Dynamic Categories Rendered Here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- PDF LISTINGS SECTION -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <!-- Header section for lists -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-folder-open text-violet-500"></i>
+                        <span id="activeCategoryTitle">Tous les documents</span>
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-1" id="pdfCountLabel">Chargement des documents...</p>
+                </div>
+
+                <!-- Sorting Controls -->
+                <div class="flex items-center space-x-3 text-xs text-gray-400">
+                    <span>Trier par :</span>
+                    <select id="sortSelect" onchange="renderPDFs()" class="bg-dark-800 border border-dark-600 text-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:border-violet-500">
+                        <option value="recent">Plus récents</option>
+                        <option value="oldest">Plus anciens</option>
+                        <option value="title">Nom (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- PDF Cards Grid -->
+            <div id="pdfGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- PDF Cards dynamically populated -->
+            </div>
+
+            <!-- Empty State (Hidden by default) -->
+            <div id="emptyState" class="hidden text-center py-16 bg-dark-800/40 rounded-2xl border border-dark-700/60 my-6">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-dark-700 flex items-center justify-center text-gray-500 text-2xl">
+                    <i class="fa-solid fa-file-circle-xmark"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-1">Aucun document trouvé</h3>
+                <p class="text-sm text-gray-400 max-w-md mx-auto mb-4">Aucun PDF ne correspond à votre recherche ou à la catégorie sélectionnée.</p>
+                <button onclick="resetFilters()" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-medium transition">
+                    Réinitialiser les filtres
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark-800 border-t border-dark-700/60 py-8 text-xs text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:text-left items-center space-y-4 sm:space-y-0">
+            <div>
+                <p class="text-gray-300 font-semibold mb-1">DocVault Platform</p>
+                <p>© 2026 Tous droits réservés. Hébergé sur GitHub Pages & Stockage sécurisé.</p>
+            </div>
+            <div class="flex justify-center space-x-4">
+                <span class="hover:text-violet-400 cursor-pointer" onclick="openAdminAuthOrPanel()"><i class="fa-solid fa-user-shield mr-1"></i> Espace d'administration</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL: CONSULT / VIEWER PDF -->
+    <div id="viewerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-5xl h-[92vh] rounded-2xl flex flex-col overflow-hidden shadow-2xl relative">
+            <!-- Viewer Header -->
+            <div class="flex items-center justify-between px-5 py-3 border-b border-dark-700 bg-dark-800/80">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-violet-600/20 text-violet-400 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div class="truncate">
+                        <h3 id="viewerTitle" class="text-sm font-semibold text-white truncate">Titre du PDF</h3>
+                        <p id="viewerMeta" class="text-xs text-gray-400 truncate">Catégorie • Date</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <a id="viewerDownloadBtn" href="#" download class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-download"></i>
+                        <span class="hidden sm:inline">Télécharger</span>
+                    </a>
+                    <button onclick="closeViewerModal()" class="w-8 h-8 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- PDF Frame -->
+            <div class="flex-1 bg-dark-900 relative">
+                <iframe id="pdfIframe" class="w-full h-full border-0" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADMIN AUTHENTICATION -->
+    <div id="adminAuthModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-md p-6 rounded-2xl shadow-2xl relative">
+            <button onclick="closeAdminAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 bg-violet-600/20 text-violet-400 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-violet-500/30">
+                    <i class="fa-solid fa-shield-halved text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Connexion Administration</h3>
+                <p class="text-xs text-gray-400 mt-1">Saisissez le mot de passe pour gérer les documents et catégories</p>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Mot de passe</label>
+                    <input type="password" id="adminPasswordInput" required placeholder="Entrez le mot de passe..." 
+                        class="w-full px-4 py-2.5 rounded-xl bg-dark-800 border border-dark-600 text-sm text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500">
+                    <p class="text-[11px] text-gray-500 mt-1.5"><i class="fa-solid fa-circle-info mr-1"></i>Mot de passe par défaut : <span class="text-violet-400 font-mono">admin123</span></p>
+                </div>
+
+                <div id="authErrorMsg" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/30 p-2.5 rounded-xl">
+                    Mot de passe incorrect.
+                </div>
+
+                <button type="submit" class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-semibold transition shadow-lg shadow-violet-600/30">
+                    Se connecter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADMIN PANEL (ADD/EDIT PDF & CATEGORIES) -->
+    <div id="adminPanelModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm">
+        <div class="glass-modal w-full max-w-3xl max-h-[90vh] rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-dark-700 bg-dark-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-violet-600/20 text-violet-400 flex items-center justify-center">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Espace d'Administration</h3>
+                        <p class="text-xs text-gray-400">Ajoutez, modifiez vos PDF ou gérez vos catégories</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="logoutAdmin()" class="px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 rounded-lg border border-red-500/20 transition">
+                        Déconnexion
+                    </button>
+                    <button onclick="closeAdminPanelModal()" class="w-8 h-8 rounded-lg bg-dark-700 hover:bg-dark-600 text-gray-300 flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body Tabs & Content -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+                <!-- TAB HEADERS -->
+                <div class="flex border-b border-dark-700 space-x-6 text-sm">
+                    <button id="tabAddBtn" onclick="switchAdminTab('add')" class="pb-3 font-semibold border-b-2 border-violet-500 text-violet-400">
+                        <i class="fa-solid fa-plus-circle mr-1.5"></i> Publier un PDF
+                    </button>
+                    <button id="tabCatBtn" onclick="switchAdminTab('categories')" class="pb-3 font-semibold text-gray-400 border-b-2 border-transparent hover:text-gray-200">
+                        <i class="fa-solid fa-tags mr-1.5"></i> Gérer les Catégories
+                    </button>
+                </div>
+
+                <!-- TAB CONTENT 1: ADD / EDIT PDF -->
+                <div id="tabAddContent" class="space-y-4">
+                    <form onsubmit="handleSavePDF(event)" class="space-y-4">
+                        <input type="hidden" id="editPdfId" value="">
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-300 mb-1">Titre du document *</label>
+                            <input type="text" id="pdfTitle" required placeholder="Ex: Guide de démarrage GTA Modding" 
+                                class="w-full px-4 py-2 rounded-xl bg-dark-800 border border-dark-600 text-sm text-white focus:outline-none focus:border-violet-500">
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-300 mb-1">Catégorie *</label>
+                                <select id="pdfCategorySelect" required class="w-full px-4 py-2 rounded-xl bg-dark-800 border border-dark-600 text-sm text-white focus:outline-none focus:border-violet-500">
+                                    <!-- Dynamic options -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-300 mb-1">Taille / Pages (Optionnel)</label>
+                                <input type="text" id="pdfMeta" placeholder="Ex: 2.4 Mo • 15 pages" 
+                                    class="w-full px-4 py-2 rounded-xl bg-dark-800 border border-dark-600 text-sm text-white focus:outline-none focus:border-violet-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-300 mb-1">Description courte *</label>
+                            <textarea id="pdfDescription" required rows="3" placeholder="Présentation synthétique du contenu du PDF..." 
+                                class="w-full px-4 py-2 rounded-xl bg-dark-800 border border-dark-600 text-sm text-white focus:outline-none focus:border-violet-500"></textarea>
+                        </div>
+
+                        <!-- Source selection: URL or File Upload -->
+                        <div class="bg-dark-800/60 p-4 rounded-xl border border-dark-700 space-y-3">
+                            <label class="block text-xs font-medium text-violet-400">Source du fichier PDF *</label>
+                            
+                            <div class="flex items-center space-x-4 text-xs">
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="pdfSourceType" value="url" checked onchange="toggleSourceType()" class="text-violet-600 focus:ring-violet-500">
+                                    <span class="text-gray-300">Lien Direct (URL HTTPS)</span>
+                                </label>
+                                <label class="flex items-center space-x-2 cursor-pointer">
+                                    <input type="radio" name="pdfSourceType" value="file" onchange="toggleSourceType()" class="text-violet-600 focus:ring-violet-500">
+                                    <span class="text-gray-300">Importer un fichier local</span>
+                                </label>
+                            </div>
+
+                            <div id="urlInputContainer">
+                                <input type="url" id="pdfUrl" placeholder="https://exemple.com/document.pdf" 
+                                    class="w-full px-4 py-2 rounded-xl bg-dark-900 border border-dark-600 text-sm text-white focus:outline-none focus:border-violet-500">
+                                <p class="text-[11px] text-gray-500 mt-1">Conseil : Vous pouvez utiliser un lien vers n'importe quel fichier PDF public accessible.</p>
+                            </div>
+
+                            <div id="fileInputContainer" class="hidden">
+                                <input type="file" id="pdfFileInput" accept="application/pdf" onchange="handleFileSelect(event)"
+                                    class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-violet-600 file:text-white hover:file:bg-violet-700 cursor-pointer">
+                                <p id="fileUploadStatus" class="text-[11px] text-gray-400 mt-1"></p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-3 pt-2">
+                            <button type="button" onclick="cancelEdit()" id="cancelEditBtn" class="hidden px-4 py-2 rounded-xl bg-dark-700 text-gray-300 text-xs font-semibold hover:bg-dark-600">
+                                Annuler
+                            </button>
+                            <button type="submit" class="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold transition flex items-center gap-2 shadow-lg shadow-violet-600/30">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span id="saveBtnText">Enregistrer et Publier</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- TAB CONTENT 2: MANAGE CATEGORIES -->
+                <div id="tabCatContent" class="hidden space-y-4">
+                    <form onsubmit="handleAddCategory(event)" class="flex gap-2">
+                        <input type="text" id="newCategoryInput" required placeholder="Nom de la nouvelle catégorie..." 
+                            class="flex-1 px-4 py-2 rounded-xl bg-dark-800 border border-dark-600 text-sm text-white focus:outline-none focus:border-violet-500">
+                        <button type="submit" class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Ajouter
+                        </button>
+                    </form>
+
+                    <div class="mt-4">
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Catégories existantes</h4>
+                        <div id="categoriesAdminList" class="space-y-2 max-h-60 overflow-y-auto">
+                            <!-- Dynamic category list -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="glass border-l-4 border-violet-500 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-violet-400 text-lg"></i>
+            <span id="toastMessage" class="text-sm font-medium">Notification message</span>
+        </div>
+    </div>
+
+    <!-- APPLICATION JAVASCRIPT LOGIC -->
+    <script>
+        // INITIAL DATA & STORAGE SETUP
+        const DEFAULT_CATEGORIES = ["Tous", "Jeux vidéo", "Guides", "Tutoriels", "Actualités", "Mods", "Autres"];
+        
+        const DEFAULT_PDFS = [
+            {
+                id: 'pdf-1',
+                title: 'Guide complet GTA V Modding & Optimization',
+                category: 'Mods',
+                description: 'Un guide exhaustif étape par étape pour installer des véhicules, scripts et packs graphiques Redux en toute sécurité.',
+                date: '2026-02-15',
+                meta: '4.2 Mo • 28 pages',
+                url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf'
+            },
+            {
+                id: 'pdf-2',
+                title: 'Tutoriel Web Development - Modern Stack 2026',
+                category: 'Tutoriels',
+                description: 'Apprenez les bases de HTML5, Tailwind CSS, JavaScript moderne et le déploiement rapide sur GitHub Pages.',
+                date: '2026-03-01',
+                meta: '1.8 Mo • 14 pages',
+                url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+            },
+            {
+                id: 'pdf-3',
+                title: 'Actualités Tech & Gaming - Synthèse Mensuelle',
+                category: 'Actualités',
+                description: 'Synthèse complète des annonces matérielles et des sorties de jeux majeures prévues pour ce trimestre.',
+                date: '2026-03-04',
+                meta: '3.1 Mo • 20 pages',
+                url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf'
+            }
+        ];
+
+        // State Management
+        let categories = JSON.parse(localStorage.getItem('docvault_categories')) || DEFAULT_CATEGORIES;
+        let pdfs = JSON.parse(localStorage.getItem('docvault_pdfs')) || DEFAULT_PDFS;
+        let activeCategory = "Tous";
+        let searchQuery = "";
+        let isAdminLoggedIn = false;
+        let uploadedBase64 = "";
+
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderPDFs();
+            populateCategorySelect();
+        });
+
+        // TOAST SYSTEM
+        function showToast(message, iconClass = "fa-circle-check") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = message;
+            toastIcon.className = `fa-solid ${iconClass} text-violet-400 text-lg`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // CATEGORY RENDERING & LOGIC
+        function renderCategories() {
+            const container = document.getElementById('categoriesContainer');
+            container.innerHTML = categories.map(cat => {
+                const isActive = cat === activeCategory;
+                return `
+                    <button onclick="selectCategory('${cat}')" 
+                        class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition ${
+                            isActive 
+                            ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30' 
+                            : 'bg-dark-700/80 hover:bg-dark-600 text-gray-300 border border-dark-600'
+                        }">
+                        ${cat}
+                    </button>
+                `;
+            }).join('');
+
+            // Also render inside Admin Category Tab
+            renderAdminCategories();
+        }
+
+        function selectCategory(cat) {
+            activeCategory = cat;
+            document.getElementById('activeCategoryTitle').innerText = cat === "Tous" ? "Tous les documents" : `Catégorie : ${cat}`;
+            renderCategories();
+            renderPDFs();
+        }
+
+        function resetFilters() {
+            activeCategory = "Tous";
+            searchQuery = "";
+            document.getElementById('searchInput').value = "";
+            document.getElementById('mobileSearchInput').value = "";
+            document.getElementById('activeCategoryTitle').innerText = "Tous les documents";
+            renderCategories();
+            renderPDFs();
+        }
+
+        // SEARCH HANDLING
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            renderPDFs();
+        }
+
+        function handleSearchMobile() {
+            searchQuery = document.getElementById('mobileSearchInput').value.toLowerCase().trim();
+            renderPDFs();
+        }
+
+        // RENDER PDF CARDS
+        function renderPDFs() {
+            const grid = document.getElementById('pdfGrid');
+            const emptyState = document.getElementById('emptyState');
+            const countLabel = document.getElementById('pdfCountLabel');
+
+            // Filter logic
+            let filtered = pdfs.filter(pdf => {
+                const matchesCat = (activeCategory === "Tous") || (pdf.category === activeCategory);
+                const matchesSearch = pdf.title.toLowerCase().includes(searchQuery) || 
+                                      pdf.description.toLowerCase().includes(searchQuery) ||
+                                      pdf.category.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSearch;
+            });
+
+            // Sorting logic
+            const sortBy = document.getElementById('sortSelect').value;
+            if (sortBy === 'recent') {
+                filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (sortBy === 'oldest') {
+                filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+            } else if (sortBy === 'title') {
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+            }
+
+            countLabel.innerText = `${filtered.length} document(s) disponible(s)`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            grid.innerHTML = filtered.map(pdf => {
+                const dateFormatted = new Date(pdf.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `
+                    <div class="glass rounded-2xl p-5 flex flex-col justify-between hover:border-violet-500/40 transition duration-300 hover:shadow-xl hover:shadow-violet-500/5 group">
+                        <div>
+                            <!-- Header Tag & Date -->
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20">
+                                    ${pdf.category}
+                                </span>
+                                <span class="text-xs text-gray-500 flex items-center gap-1">
+                                    <i class="fa-regular fa-calendar text-[10px]"></i> ${dateFormatted}
+                                </span>
+                            </div>
+
+                            <!-- PDF Title -->
+                            <h3 class="text-base font-bold text-white group-hover:text-violet-400 transition line-clamp-2 mb-2">
+                                ${pdf.title}
+                            </h3>
+
+                            <!-- Description -->
+                            <p class="text-xs text-gray-400 line-clamp-3 mb-4 leading-relaxed">
+                                ${pdf.description}
+                            </p>
+                        </div>
+
+                        <div>
+                            <!-- Meta / Info Size -->
+                            <div class="text-[11px] text-gray-500 flex items-center justify-between mb-4 pt-3 border-t border-dark-700/60">
+                                <span><i class="fa-solid fa-file text-violet-400/80 mr-1"></i> Format PDF</span>
+                                <span>${pdf.meta || 'Document PDF'}</span>
+                            </div>
+
+                            <!-- Card Actions -->
+                            <div class="flex items-center space-x-2">
+                                <button onclick="openViewer('${pdf.id}')" 
+                                    class="flex-1 py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                                    <i class="fa-solid fa-eye"></i> Consulter
+                                </button>
+                                <a href="${pdf.url}" download="${pdf.title}.pdf" target="_blank"
+                                    class="py-2 px-3 rounded-xl bg-dark-700 hover:bg-dark-600 text-gray-200 text-xs font-semibold flex items-center justify-center gap-1 border border-dark-600 transition">
+                                    <i class="fa-solid fa-download"></i>
+                                </a>
+                                ${isAdminLoggedIn ? `
+                                    <button onclick="prepareEditPDF('${pdf.id}')" title="Modifier" class="py-2 px-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs transition">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button onclick="deletePDF('${pdf.id}')" title="Supprimer" class="py-2 px-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs transition">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // VIEWING PDF MODAL
+        function openViewer(id) {
+            const pdf = pdfs.find(p => p.id === id);
+            if (!pdf) return;
+
+            document.getElementById('viewerTitle').innerText = pdf.title;
+            document.getElementById('viewerMeta').innerText = `${pdf.category} • Publié le ${pdf.date}`;
+            
+            const iframe = document.getElementById('pdfIframe');
+            iframe.src = pdf.url;
+
+            const downloadBtn = document.getElementById('viewerDownloadBtn');
+            downloadBtn.href = pdf.url;
+            downloadBtn.setAttribute('download', `${pdf.title}.pdf`);
+
+            document.getElementById('viewerModal').classList.remove('hidden');
+        }
+
+        function closeViewerModal() {
+            document.getElementById('viewerModal').classList.add('hidden');
+            document.getElementById('pdfIframe').src = "about:blank";
+        }
+
+        // ADMIN AUTH & MODAL CONTROLS
+        function openAdminAuthOrPanel() {
+            if (isAdminLoggedIn) {
+                openAdminPanelModal();
+            } else {
+                document.getElementById('adminAuthModal').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+            document.getElementById('authErrorMsg').classList.add('hidden');
+            document.getElementById('adminPasswordInput').value = "";
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPasswordInput').value;
+            
+            // Password Check (Default: admin123)
+            if (pass === "admin123") {
+                isAdminLoggedIn = true;
+                closeAdminAuthModal();
+                updateAdminUI();
+                openAdminPanelModal();
+                showToast("Connexion administration réussie");
+                renderPDFs();
+            } else {
+                document.getElementById('authErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            updateAdminUI();
+            closeAdminPanelModal();
+            renderPDFs();
+            showToast("Déconnexion administration effectuée");
+        }
+
+        function updateAdminUI() {
+            const btnText = document.getElementById('adminBtnText');
+            if (isAdminLoggedIn) {
+                btnText.innerText = "Admin (Connecté)";
+            } else {
+                btnText.innerText = "Administration";
+            }
+        }
+
+        function openAdminPanelModal() {
+            populateCategorySelect();
+            document.getElementById('adminPanelModal').classList.remove('hidden');
+        }
+
+        function closeAdminPanelModal() {
+            document.getElementById('adminPanelModal').classList.add('hidden');
+            cancelEdit();
+        }
+
+        function switchAdminTab(tab) {
+            const addBtn = document.getElementById('tabAddBtn');
+            const catBtn = document.getElementById('tabCatBtn');
+            const addContent = document.getElementById('tabAddContent');
+            const catContent = document.getElementById('tabCatContent');
+
+            if (tab === 'add') {
+                addBtn.className = "pb-3 font-semibold border-b-2 border-violet-500 text-violet-400";
+                catBtn.className = "pb-3 font-semibold text-gray-400 border-b-2 border-transparent hover:text-gray-200";
+                addContent.classList.remove('hidden');
+                catContent.classList.add('hidden');
+            } else {
+                catBtn.className = "pb-3 font-semibold border-b-2 border-violet-500 text-violet-400";
+                addBtn.className = "pb-3 font-semibold text-gray-400 border-b-2 border-transparent hover:text-gray-200";
+                catContent.classList.remove('hidden');
+                addContent.classList.add('hidden');
+            }
+        }
+
+        // SOURCE TYPE TOGGLE (URL vs FILE)
+        function toggleSourceType() {
+            const sourceType = document.querySelector('input[name="pdfSourceType"]:checked').value;
+            const urlContainer = document.getElementById('urlInputContainer');
+            const fileContainer = document.getElementById('fileInputContainer');
+
+            if (sourceType === 'url') {
+                urlContainer.classList.remove('hidden');
+                fileContainer.classList.add('hidden');
+            } else {
+                urlContainer.classList.add('hidden');
+                fileContainer.classList.remove('hidden');
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            const status = document.getElementById('fileUploadStatus');
+            
+            if (file) {
+                if (file.type !== 'application/pdf') {
+                    status.innerText = "Erreur: Seuls les fichiers PDF sont acceptés.";
+                    status.className = "text-[11px] text-red-400 mt-1";
+                    uploadedBase64 = "";
+                    return;
+                }
+
+                if (file.size > 15 * 1024 * 1024) {
+                    status.innerText = "Attention: Fichier supérieur à 15 Mo (peut affecter les performances).";
+                    status.className = "text-[11px] text-amber-400 mt-1";
+                } else {
+                    status.innerText = `Fichier chargé : ${file.name} (${(file.size/1024/1024).toFixed(2)} Mo)`;
+                    status.className = "text-[11px] text-violet-400 mt-1";
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    uploadedBase64 = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // SAVE / EDIT PDF LOGIC
+        function populateCategorySelect() {
+            const select = document.getElementById('pdfCategorySelect');
+            const filteredCategories = categories.filter(c => c !== "Tous");
+            select.innerHTML = filteredCategories.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        function handleSavePDF(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('editPdfId').value;
+            const title = document.getElementById('pdfTitle').value.trim();
+            const category = document.getElementById('pdfCategorySelect').value;
+            const meta = document.getElementById('pdfMeta').value.trim();
+            const description = document.getElementById('pdfDescription').value.trim();
+            const sourceType = document.querySelector('input[name="pdfSourceType"]:checked').value;
+            
+            let finalUrl = "";
+            if (sourceType === 'url') {
+                finalUrl = document.getElementById('pdfUrl').value.trim();
+            } else {
+                finalUrl = uploadedBase64;
+            }
+
+            if (!finalUrl) {
+                showToast("Veuillez fournir un lien PDF ou sélectionner un fichier", "fa-triangle-exclamation");
+                return;
+            }
+
+            if (editId) {
+                // Edit existing
+                const index = pdfs.findIndex(p => p.id === editId);
+                if (index !== -1) {
+                    pdfs[index] = {
+                        ...pdfs[index],
+                        title,
+                        category,
+                        meta,
+                        description,
+                        url: finalUrl
+                    };
+                    showToast("PDF mis à jour avec succès");
+                }
+            } else {
+                // Add new
+                const newPdf = {
+                    id: 'pdf-' + Date.now(),
+                    title,
+                    category,
+                    meta: meta || 'Fichier PDF',
+                    description,
+                    date: new Date().toISOString().split('T')[0],
+                    url: finalUrl
+                };
+                pdfs.unshift(newPdf);
+                showToast("Nouveau PDF publié avec succès");
+            }
+
+            // Save & Sync
+            localStorage.setItem('docvault_pdfs', JSON.stringify(pdfs));
+            renderPDFs();
+            closeAdminPanelModal();
+        }
+
+        function prepareEditPDF(id) {
+            const pdf = pdfs.find(p => p.id === id);
+            if (!pdf) return;
+
+            document.getElementById('editPdfId').value = pdf.id;
+            document.getElementById('pdfTitle').value = pdf.title;
+            document.getElementById('pdfCategorySelect').value = pdf.category;
+            document.getElementById('pdfMeta').value = pdf.meta;
+            document.getElementById('pdfDescription').value = pdf.description;
+            
+            if (pdf.url.startsWith('data:application/pdf')) {
+                document.querySelector('input[name="pdfSourceType"][value="file"]').checked = true;
+                uploadedBase64 = pdf.url;
+            } else {
+                document.querySelector('input[name="pdfSourceType"][value="url"]').checked = true;
+                document.getElementById('pdfUrl').value = pdf.url;
+            }
+            toggleSourceType();
+
+            document.getElementById('saveBtnText').innerText = "Enregistrer la modification";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            openAdminPanelModal();
+            switchAdminTab('add');
+        }
+
+        function cancelEdit() {
+            document.getElementById('editPdfId').value = "";
+            document.getElementById('pdfTitle').value = "";
+            document.getElementById('pdfMeta').value = "";
+            document.getElementById('pdfDescription').value = "";
+            document.getElementById('pdfUrl').value = "";
+            document.getElementById('pdfFileInput').value = "";
+            uploadedBase64 = "";
+            document.getElementById('saveBtnText').innerText = "Enregistrer et Publier";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        function deletePDF(id) {
+            if (confirm("Êtes-vous sûr de vouloir supprimer définitivement ce document ?")) {
+                pdfs = pdfs.filter(p => p.id !== id);
+                localStorage.setItem('docvault_pdfs', JSON.stringify(pdfs));
+                renderPDFs();
+                showToast("Document supprimé");
+            }
+        }
+
+        // CATEGORY MANAGEMENT LOGIC
+        function handleAddCategory(e) {
+            e.preventDefault();
+            const input = document.getElementById('newCategoryInput');
+            const name = input.value.trim();
+
+            if (name && !categories.includes(name)) {
+                categories.push(name);
+                localStorage.setItem('docvault_categories', JSON.stringify(categories));
+                renderCategories();
+                populateCategorySelect();
+                input.value = "";
+                showToast(`Catégorie "${name}" ajoutée`);
+            } else {
+                showToast("Catégorie existante ou invalide", "fa-triangle-exclamation");
+            }
+        }
+
+        function deleteCategory(catName) {
+            if (catName === "Tous") return;
+
+            if (confirm(`Voulez-vous supprimer la catégorie "${catName}" ?`)) {
+                categories = categories.filter(c => c !== catName);
+                localStorage.setItem('docvault_categories', JSON.stringify(categories));
+
+                if (activeCategory === catName) {
+                    activeCategory = "Tous";
+                }
+
+                renderCategories();
+                populateCategorySelect();
+                showToast(`Catégorie "${catName}" supprimée`);
+            }
+        }
+
+        function renderAdminCategories() {
+            const container = document.getElementById('categoriesAdminList');
+            if (!container) return;
+
+            container.innerHTML = categories.map(cat => {
+                const isDefault = cat === "Tous";
+                return `
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-dark-800 border border-dark-700 text-xs text-gray-200">
+                        <span class="font-medium">${cat}</span>
+                        ${!isDefault ? `
+                            <button onclick="deleteCategory('${cat}')" class="text-red-400 hover:text-red-300 px-2 py-1 rounded-lg hover:bg-red-500/10">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        ` : '<span class="text-[10px] text-gray-500 font-mono">Système</span>'}
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
